@@ -98,9 +98,7 @@ export default function LinkZorgPage() {
   return (
     <div className="project-case-study">
       {/* Project Navigation */}
-      <div className="py-4 px-6 max-w-[1400px] mx-auto">
-        <ProjectNavigation currentSlug="linkzorg" />
-      </div>
+      <ProjectNavigation currentSlug="linkzorg" />
 
       <div className="project-header max-w-[1200px] mx-auto px-6 mb-4">
         <h1 className="project-main-title hero-title opacity-0 font-bold">
@@ -266,7 +264,7 @@ export default function LinkZorgPage() {
                     <div className="flex-1 flex justify-end overflow-hidden">
                       <div className="w-full overflow-hidden">
                         <img
-                          src="/images/design-mode/bg%20analysis.png"
+                          src="/images/design-mode/bg analysis.png"
                           alt="Background analysis diagram showing LinkZorg connections to various resources"
                           className="w-full h-auto"
                           style={{ marginTop: "-90px" }}
@@ -286,7 +284,7 @@ export default function LinkZorgPage() {
                     <div className="flex-1 flex justify-end overflow-hidden">
                       <div className="w-full overflow-hidden">
                         <img
-                          src="/images/design-mode/situated%20action.png"
+                          src="/images/design-mode/situated action.png"
                           alt="Situated action research showing field visits and community sites"
                           className="w-full h-auto"
                           style={{ marginTop: "-90px" }}
@@ -306,7 +304,7 @@ export default function LinkZorgPage() {
                     <div className="flex-1 flex justify-end overflow-hidden">
                       <div className="w-full overflow-hidden">
                         <img
-                          src="/images/design-mode/user%20testing.png"
+                          src="/images/design-mode/user testing.png"
                           alt="User testing session with OLVG doctors"
                           className="w-full h-auto"
                           style={{ marginTop: "-75px" }}
@@ -430,7 +428,7 @@ export default function LinkZorgPage() {
                   }}
                 >
                   <motion.img
-                    src="https://raw.githubusercontent.com/kleindesign/portfo/main/lz-tabletmkpsq.jpg"
+                    src="/images/lz-tabletmkpsq.jpg"
                     alt="Single-page A4 aftercare template generated for 3U patients"
                     style={{ 
                       width: "100%",

@@ -18,10 +18,11 @@ export default function StrollPage() {
   ]
 
   const appScreens = [
-    { src: "/videos/Stroll_Opening.mp4", alt: "Stroll app opening animation", type: "video" },
-    { src: "/images/app_speak.png", alt: "Stroll app voice input interface", type: "image" },
-    { src: "/images/app_pairing.png", alt: "Stroll app device pairing screen", type: "image" },
-    { src: "/images/app_lock.png", alt: "Stroll app lock screen encouragement", type: "image" },
+    { src: "/videos/Stroll_Opening.mp4", alt: "Stroll app opening animation", type: "video", caption: "Start a Stroll" },
+    { src: "/images/app_speak.png", alt: "Stroll app voice input interface", type: "image", caption: "Generate Route" },
+    { src: "/images/app_pairing.png", alt: "Stroll app device pairing screen", type: "image", caption: "Device Pairing" },
+    { src: "/images/app_lock.png", alt: "Stroll app lock screen encouragement", type: "image", caption: "Lock Screen for Walking" },
+    { src: "https://jzyg8siqadeixyxx.public.blob.vercel-storage.com/Stroll_Yours.mov", alt: "Stroll app progress and badges", type: "video", caption: "Progress & Badges" },
   ]
 
   const testingImages = [
@@ -247,40 +248,43 @@ export default function StrollPage() {
     }
   }, [])
 
-  // Handle video playback when in view
+  // Handle video playback when slide changes
   useEffect(() => {
-    const videoElement = document.querySelector(".carousel-slide video")
-    if (!videoElement) return
+    const videoElements = document.querySelectorAll(".carousel-slide video")
+    if (!videoElements.length) return
 
-    const videoObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
-            // Video is fully in view, start playing
-            videoElement.play()
-            setIsVideoPlaying(true)
-          }
+    // Pause all videos and reset
+    videoElements.forEach((video) => {
+      video.pause()
+      video.currentTime = 0
+    })
+
+    // Play the current video if it's a video slide
+    if (appScreens[currentAppScreenIndex]?.type === "video") {
+      // Find which video element corresponds to current slide
+      const currentSlide = document.querySelectorAll(".carousel-slide")[currentAppScreenIndex]
+      const currentVideo = currentSlide?.querySelector("video")
+      if (currentVideo) {
+        setIsVideoPlaying(true)
+        currentVideo.play().catch(() => {
+          // Ignore autoplay errors
+          setIsVideoPlaying(false)
         })
-      },
-      { threshold: 0.8 },
-    )
 
-    videoObserver.observe(videoElement)
+        // Listen for video end
+        const handleVideoEnd = () => {
+          setIsVideoPlaying(false)
+        }
+        currentVideo.addEventListener("ended", handleVideoEnd)
 
-    // Listen for video end event
-    const handleVideoEnd = () => {
+        return () => {
+          currentVideo.removeEventListener("ended", handleVideoEnd)
+        }
+      }
+    } else {
       setIsVideoPlaying(false)
-      // Advance to next slide after video ends
-      setCurrentAppScreenIndex((prevIndex) => (prevIndex + 1) % appScreens.length)
     }
-
-    videoElement.addEventListener("ended", handleVideoEnd)
-
-    return () => {
-      videoObserver.disconnect()
-      videoElement.removeEventListener("ended", handleVideoEnd)
-    }
-  }, [currentAppScreenIndex, appScreens.length])
+  }, [currentAppScreenIndex])
 
   const animateCounters = () => {
     const counters = document.querySelectorAll(".counter-animate")
@@ -316,12 +320,21 @@ export default function StrollPage() {
     })
   }
 
+  // Re-trigger animations when survey tab becomes active
+  useEffect(() => {
+    if (activeResearchTab === "survey") {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        animateCounters()
+        animateDonutCharts()
+      }, 100)
+    }
+  }, [activeResearchTab])
+
   return (
     <div className="project-case-study">
       {/* Project Navigation */}
-      <div className="py-4 px-6 max-w-[1400px] mx-auto">
-        <ProjectNavigation currentSlug="stroll" />
-      </div>
+      <ProjectNavigation currentSlug="stroll" />
 
       {/* Title and Tagline Above Hero */}
       <div className="project-header max-w-[1200px] mx-auto px-6 mb-4">
@@ -527,7 +540,7 @@ export default function StrollPage() {
                           <div className="percentage">92%</div>
                         </div>
                         <span className="stat-label">
-                          reported weekly <span className="text-[#00aeef]">technology overload</span>
+                          reported weekly<br /><span className="text-[#00aeef]">technology overload</span>
                         </span>
                       </div>
                       <div className="stat-column">
@@ -546,7 +559,7 @@ export default function StrollPage() {
                           <div className="percentage">85%</div>
                         </div>
                         <span className="stat-label">
-                          wanted a way to navigate <span className="text-[#00aeef]">without a screen</span>
+                          wanted a way to navigate<br /><span className="text-[#00aeef]">without a screen</span>
                         </span>
                       </div>
                     </div>
@@ -559,8 +572,8 @@ export default function StrollPage() {
                         <div className="space-y-2">
                           <div className="motivation-bar-container group">
                             <div
-                              className="motivation-bar bg-[#00aeef] h-8 rounded flex items-center px-3 relative"
-                              style={{ width: "100%", animation: "barGrow 1.5s ease-out forwards", animationDelay: "0.5s" }}
+                              className="motivation-bar bg-[#00aeef] h-8 flex items-center px-3 relative"
+                              style={{ width: "100%", animation: "barGrow 1.5s ease-out forwards", animationDelay: "0.5s", borderRadius: "16px" }}
                             >
                               <img src="/images/design-mode/exercise.png" alt="Exercise" className="w-8 h-8 mr-3" />
                               <span className="text-white text-sm">physical exercise</span>
@@ -571,8 +584,8 @@ export default function StrollPage() {
                           </div>
                           <div className="motivation-bar-container group">
                             <div
-                              className="motivation-bar bg-[#00aeef] h-8 rounded flex items-center px-3 relative"
-                              style={{ width: "98%", animation: "barGrow 1.5s ease-out forwards", animationDelay: "0.7s" }}
+                              className="motivation-bar bg-[#00aeef] h-8 flex items-center px-3 relative"
+                              style={{ width: "98%", animation: "barGrow 1.5s ease-out forwards", animationDelay: "0.7s", borderRadius: "16px" }}
                             >
                               <img src="/images/design-mode/freshair.png" alt="Fresh air" className="w-8 h-8 mr-3" />
                               <span className="text-white text-sm">fresh air</span>
@@ -583,8 +596,8 @@ export default function StrollPage() {
                           </div>
                           <div className="motivation-bar-container group">
                             <div
-                              className="motivation-bar bg-[#00aeef] h-8 rounded flex items-center px-3 relative"
-                              style={{ width: "79%", animation: "barGrow 1.5s ease-out forwards", animationDelay: "0.9s" }}
+                              className="motivation-bar bg-[#00aeef] h-8 flex items-center px-3 relative"
+                              style={{ width: "79%", animation: "barGrow 1.5s ease-out forwards", animationDelay: "0.9s", borderRadius: "16px" }}
                             >
                               <img src="/images/design-mode/clearhead.png" alt="Clear head" className="w-8 h-8 mr-3" />
                               <span className="text-white text-sm">clear my head</span>
@@ -595,8 +608,8 @@ export default function StrollPage() {
                           </div>
                           <div className="motivation-bar-container group">
                             <div
-                              className="motivation-bar bg-[#00aeef] h-8 rounded flex items-center px-3 relative"
-                              style={{ width: "79%", animation: "barGrow 1.5s ease-out forwards", animationDelay: "1.1s" }}
+                              className="motivation-bar bg-[#00aeef] h-8 flex items-center px-3 relative"
+                              style={{ width: "79%", animation: "barGrow 1.5s ease-out forwards", animationDelay: "1.1s", borderRadius: "16px" }}
                             >
                               <img src="/images/design-mode/nature.png" alt="Nature" className="w-8 h-8 mr-3" />
                               <span className="text-white text-sm">connect with nature</span>
@@ -644,7 +657,7 @@ export default function StrollPage() {
 
                     <div className="frameworks-grid grid grid-cols-1 md:grid-cols-3 gap-6">
                       {/* Calm Technology */}
-                      <div 
+                      <div
                         className="framework-item flex flex-col"
                         style={{
                           animation: "fadeInUp 0.6s ease-out forwards",
@@ -653,21 +666,22 @@ export default function StrollPage() {
                           transform: "translateY(20px)"
                         }}
                       >
-                        <div className="framework-image mb-auto">
+                        <div className="framework-image" style={{ height: "170px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                           <img
-                            src="https://raw.githubusercontent.com/kleindesign/portfo/main/calm-technology-book.jpg"
+                            src="/images/calm-technology-book.jpg"
                             alt="Calm Technology book cover"
                             className="w-full h-auto"
-                            style={{ maxHeight: "200px", objectFit: "contain" }}
+                            style={{ maxHeight: "170px", objectFit: "contain" }}
                           />
                         </div>
-                        <p className="text-sm mt-4">
+                        <div style={{ height: "48px" }}></div>
+                        <p className="text-sm mt-6">
                           calm tech principles for designing technology that works with human attention, instead of against it (a. case, 2015; calm tech institute, 2023)
                         </p>
                       </div>
 
                       {/* Designing with the Body */}
-                      <div 
+                      <div
                         className="framework-item flex flex-col"
                         style={{
                           animation: "fadeInUp 0.6s ease-out forwards",
@@ -676,21 +690,22 @@ export default function StrollPage() {
                           transform: "translateY(20px)"
                         }}
                       >
-                        <div className="framework-image mb-auto">
+                        <div className="framework-image" style={{ height: "170px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                           <img
-                            src="https://raw.githubusercontent.com/kleindesign/portfo/main/designing-with-the-body.jpg"
+                            src="/images/designing-with-the-body.jpg"
                             alt="Designing with the Body book cover"
                             className="w-full h-auto"
-                            style={{ maxHeight: "200px", objectFit: "contain" }}
+                            style={{ maxHeight: "170px", objectFit: "contain" }}
                           />
                         </div>
-                        <p className="text-sm mt-4">
+                        <div style={{ height: "48px" }}></div>
+                        <p className="text-sm mt-6">
                           soma design principles can empower us through embodied interaction (designing with the body: somaesthetic interaction design, k. höök, 2018)
                         </p>
                       </div>
 
                       {/* Cognitive Performance Study */}
-                      <div 
+                      <div
                         className="framework-item flex flex-col"
                         style={{
                           animation: "fadeInUp 0.6s ease-out forwards",
@@ -699,14 +714,14 @@ export default function StrollPage() {
                           transform: "translateY(20px)"
                         }}
                       >
-                        <div className="framework-image mb-auto">
+                        <div className="framework-image" style={{ height: "170px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                           <img
-                            src="https://raw.githubusercontent.com/kleindesign/portfo/main/cognitiveactivity.jpg"
+                            src="/images/cognitiveactivity.jpg"
                             alt="Brain activity comparison after sitting vs walking"
                             className="w-full h-auto"
-                            style={{ maxHeight: "200px", objectFit: "contain" }}
+                            style={{ maxHeight: "110px", objectFit: "contain" }}
                           />
-                          <div className="flex justify-around text-xs text-center mt-2">
+                          <div className="flex justify-around text-xs text-center mt-2 w-full">
                             <div>
                               <span className="block">after 20 minutes of</span>
                               <span className="block">sitting quietly</span>
@@ -717,7 +732,8 @@ export default function StrollPage() {
                             </div>
                           </div>
                         </div>
-                        <p className="text-sm mt-4">
+                        <div style={{ height: "48px" }}></div>
+                        <p className="text-sm mt-6">
                           a cognitive performance study visualized the hidden benefits of walking (hillman, et al, 2009)
                         </p>
                       </div>
@@ -736,8 +752,6 @@ export default function StrollPage() {
             <p className="section-tagline mb-1 mt-1 font-light">From sketches to wearables.</p>
           </div>
           <div className="section-body mt-3">
-            <p>Our team of three designers tackled research, ideation, and prototyping in our initial design sprint.</p>
-
             <div className="gantt-chart-interactive">
               <div className="flex gap-8 items-start">
                 {/* Gantt bars - left side */}
@@ -853,40 +867,106 @@ export default function StrollPage() {
           </div>
         </section>
 
-        {/* Section 4.5: Information Architecture & User Flows */}
+        {/* Section 4.5: The Stroll App */}
         <section className="content-section scroll-animate py-4">
           <div className="section-header">
-            <h2 className="section-title">Information Architecture & User Flows</h2>
+            <h2 className="section-title">The Stroll App</h2>
           </div>
           <div className="section-body mt-3">
             <div className="flex flex-col lg:flex-row gap-8 items-start">
-              <div className="flex-1">
+              <div className="flex-1 relative">
                 <p>
-                  I designed streamlined user flows emphasizing minimal interaction to reduce cognitive load during
-                  walking.{" "}
+                  The Stroll app provides simple navigation controls and coaching feedback, designed for minimal interaction before and after walks.
                 </p>
-                <p>
-                  The wearable delivers haptic cues passively, while the app provides simple start/stop navigation
-                  controls and coaching feedback.{" "}
-                </p>
-                <p>
-                  Emergency alert activation is a one-step long-press on the device, ensuring quick access without
-                  distraction. This architecture supports an intuitive experience.
+                <p className="text-[#00aeef] font-semibold text-right mt-8">
+                  {appScreens[currentAppScreenIndex]?.caption}
                 </p>
               </div>
               <div className="flex-1 flex justify-center">
                 <div className="app-screens-carousel relative w-[90%] max-w-xs mx-auto">
-                  <div className="carousel-container relative overflow-hidden rounded-lg">
+                  <div
+                    className="carousel-container relative overflow-hidden select-none"
+                    style={{ borderRadius: "24px", cursor: "grab", userSelect: "none" }}
+                    onTouchStart={(e) => {
+                      const touch = e.touches[0]
+                      e.currentTarget.dataset.startX = touch.clientX
+                    }}
+                    onTouchEnd={(e) => {
+                      const touch = e.changedTouches[0]
+                      const startX = parseFloat(e.currentTarget.dataset.startX || "0")
+                      const diff = startX - touch.clientX
+                      if (Math.abs(diff) > 50) {
+                        if (diff > 0 && currentAppScreenIndex < appScreens.length - 1) {
+                          setCurrentAppScreenIndex(currentAppScreenIndex + 1)
+                        } else if (diff < 0 && currentAppScreenIndex > 0) {
+                          setCurrentAppScreenIndex(currentAppScreenIndex - 1)
+                        }
+                      }
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      e.currentTarget.dataset.startX = String(e.clientX)
+                      e.currentTarget.dataset.isDragging = "true"
+                      e.currentTarget.style.cursor = "grabbing"
+                    }}
+                    onMouseMove={(e) => {
+                      if (e.currentTarget.dataset.isDragging !== "true") return
+                      e.preventDefault()
+                    }}
+                    onMouseUp={(e) => {
+                      if (e.currentTarget.dataset.isDragging !== "true") return
+                      e.preventDefault()
+                      e.currentTarget.dataset.isDragging = "false"
+                      e.currentTarget.style.cursor = "grab"
+                      const startX = parseFloat(e.currentTarget.dataset.startX || "0")
+                      const diff = startX - e.clientX
+                      if (Math.abs(diff) > 50) {
+                        if (diff > 0 && currentAppScreenIndex < appScreens.length - 1) {
+                          setCurrentAppScreenIndex(currentAppScreenIndex + 1)
+                        } else if (diff < 0 && currentAppScreenIndex > 0) {
+                          setCurrentAppScreenIndex(currentAppScreenIndex - 1)
+                        }
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (e.currentTarget.dataset.isDragging === "true") {
+                        const startX = parseFloat(e.currentTarget.dataset.startX || "0")
+                        const diff = startX - e.clientX
+                        if (Math.abs(diff) > 50) {
+                          if (diff > 0 && currentAppScreenIndex < appScreens.length - 1) {
+                            setCurrentAppScreenIndex(currentAppScreenIndex + 1)
+                          } else if (diff < 0 && currentAppScreenIndex > 0) {
+                            setCurrentAppScreenIndex(currentAppScreenIndex - 1)
+                          }
+                        }
+                        e.currentTarget.dataset.isDragging = "false"
+                        e.currentTarget.style.cursor = "grab"
+                      }
+                    }}
+                  >
                     <div
                       className="carousel-track flex transition-transform duration-500 ease-in-out"
-                      style={{ transform: `translateX(-${currentAppScreenIndex * 100}%)` }}
+                      style={{ transform: `translateX(-${currentAppScreenIndex * 100}%)`, pointerEvents: "none" }}
                     >
                       {appScreens.map((screen, index) => (
                         <div key={index} className="carousel-slide flex-shrink-0 w-full">
                           {screen.type === "video" ? (
-                            <video src={screen.src} alt={screen.alt} className="w-full h-auto" muted playsInline />
+                            <video
+                              src={screen.src}
+                              className="w-full h-auto"
+                              muted
+                              playsInline
+                              loop
+                              autoPlay={index === currentAppScreenIndex}
+                              style={{ pointerEvents: "none" }}
+                            />
                           ) : (
-                            <img src={screen.src || "/placeholder.svg"} alt={screen.alt} className="w-full h-auto" />
+                            <img
+                              src={screen.src || "/placeholder.svg"}
+                              alt={screen.alt}
+                              className="w-full h-auto"
+                              style={{ pointerEvents: "none" }}
+                            />
                           )}
                         </div>
                       ))}
@@ -1004,6 +1084,18 @@ export default function StrollPage() {
           <div className="section-body mt-3">
             <ul>
               <li>
+                Calm Tech{" "}
+                <a
+                  href="https://www.calmtech.institute/calm-tech-pre-certification"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#00aeef] hover:text-black transition-colors"
+                >
+                  Pre-certified
+                </a>{" "}
+                by the Calm Tech Institute
+              </li>
+              <li>
                 Featured at{" "}
                 <a
                   href="https://thingscon.notion.site/exhibition-generative-things"
@@ -1024,10 +1116,11 @@ export default function StrollPage() {
                   rel="noreferrer"
                   className="text-[#00aeef] hover:text-black transition-colors"
                 >
-                  Dutch Design Week 2025
-                </a>
+                  Dutch Design Week
+                </a>{" "}
+                2025
               </li>
-              <li>Published in Generative Things: The State of Responsible Tech 2025</li>
+              <li>Published in <em>Generative Things: The State of Responsible Tech 2025</em></li>
             </ul>
           </div>
         </section>

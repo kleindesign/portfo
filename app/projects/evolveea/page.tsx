@@ -44,9 +44,7 @@ export default function EvolveEAPage() {
   return (
     <div className="project-case-study">
       {/* Project Navigation */}
-      <div className="py-4 px-6 max-w-[1400px] mx-auto" >
-        <ProjectNavigation currentSlug="evolveea" />
-      </div>
+      <ProjectNavigation currentSlug="evolveea" />
 
       {/* Title and Tagline Above Hero */}
       <div className="project-header max-w-[1200px] mx-auto px-6 mb-4 text-center">
@@ -81,7 +79,7 @@ export default function EvolveEAPage() {
             marginBottom: "-6.2%",
           }}
         >
-          <source src="https://raw.githubusercontent.com/kleindesign/portfo/main/Untitled.mp4" type="video/mp4" />
+          <source src="/videos/Untitled.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </section>
@@ -129,7 +127,7 @@ export default function EvolveEAPage() {
             </div>
             <div className="section-visual" style={{ marginRight: "2rem" }}>
               <img 
-                src="https://raw.githubusercontent.com/kleindesign/portfo/main/Cost_over_time.jpg" 
+                src="/images/Cost_over_time.jpg" 
                 alt="Cost over time chart visualization" 
                 className="w-full h-auto max-w-xl opacity-0 transition-all duration-700 ease-out"
                 loading="lazy"
@@ -154,7 +152,7 @@ export default function EvolveEAPage() {
             </div>
             <div className="section-visual" style={{ marginRight: "2rem" }}>
               <img 
-                src="https://raw.githubusercontent.com/kleindesign/portfo/main/directorycards3d.jpg" 
+                src="/images/directorycards3d.jpg" 
                 alt="Building performance dashboard directory cards" 
                 className="w-full h-auto max-w-xl opacity-0 transition-all duration-700 ease-out"
                 loading="lazy"
@@ -188,7 +186,7 @@ export default function EvolveEAPage() {
           }}
         >
           <img 
-            src="https://raw.githubusercontent.com/kleindesign/portfo/main/directory.jpg" 
+            src="/images/directory.jpg" 
             alt="Project directory view" 
             className="w-full h-auto opacity-0 transition-all duration-700 ease-out"
             loading="lazy"

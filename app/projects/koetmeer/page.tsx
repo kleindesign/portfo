@@ -41,7 +41,7 @@ export default function KoetMeerPage() {
   return (
     <div className="project-case-study">
       {/* Project Navigation */}
-      <ProjectNavigation />
+      <ProjectNavigation currentSlug="koetmeer" />
 
       <div className="project-content max-w-[1200px] mx-auto px-6">
         {/* Title Above Hero */}
@@ -49,6 +49,9 @@ export default function KoetMeerPage() {
           <h1 className="project-main-title hero-title opacity-0 font-bold">
             KoetMeer
           </h1>
+          <div className="project-tagline scroll-animate" style={{ width: "95%", maxWidth: "1200px" }}>
+            growing and celebrating biodiversity in amsterdam's canals
+          </div>
         </div>
       </div>
 
@@ -70,7 +73,7 @@ export default function KoetMeerPage() {
           alignItems: "center"
         }}>
           <img
-            src="https://raw.githubusercontent.com/kleindesign/portfo/main/koet-site-banner.png"
+            src="/images/koet-site-banner.png"
             alt="KoetMeer project banner"
             style={{
               width: "100%",
@@ -83,10 +86,23 @@ export default function KoetMeerPage() {
 
       <div className="project-content max-w-[1200px] mx-auto px-6">
         <section className="content-section scroll-animate py-4">
-          <div className="text-center">
-            <h2 className="text-5xl font-bold mb-12">Coming Soon</h2>
-            
-            <div className="flex items-center justify-center gap-8 mt-6">
+          <div className="section-body">
+            <p className="text-lg mb-8">
+              KoetMeer is a citizen science app for urban ecology, currently in development through co-design workshops with Amsterdam residents and visitors. The platform will support community-built floating habitat gardens on Amsterdam's canals, with features for biodiversity tracking, self-guided tours, and a local species identification guide.
+            </p>
+
+            <div className="flex justify-center mb-8">
+              <img
+                src="/images/koet-workshop1.jpg"
+                alt="KoetMeer co-design workshop with Amsterdam residents"
+                className="max-w-full h-auto"
+                style={{ maxHeight: "500px", objectFit: "contain" }}
+              />
+            </div>
+
+            <div className="text-center mt-12">
+              <p className="text-lg mb-6">Sign up to join the beta or learn more.</p>
+
               <a
                 href="https://koetmeer.nl"
                 target="_blank"

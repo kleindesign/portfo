@@ -18,9 +18,9 @@ export default function SheltersPage() {
   const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.25, 1])
 
   const processImages = [
-    { src: "https://raw.githubusercontent.com/kleindesign/portfo/main/Example-Insta-StoryMap-Promo.JPG", alt: "StoryMap promotion" },
-    { src: "https://raw.githubusercontent.com/kleindesign/portfo/main/migration-map.jpg", alt: "Migration map" },
-    { src: "https://raw.githubusercontent.com/kleindesign/portfo/main/green-roof-diagram.png", alt: "Green roof diagram" },
+    { src: "/images/Example-Insta-StoryMap-Promo.JPG", alt: "StoryMap promotion" },
+    { src: "/images/migration-map.jpg", alt: "Migration map" },
+    { src: "/images/green-roof-diagram.png", alt: "Green roof diagram" },
   ]
 
   const processPhases = [
@@ -160,9 +160,7 @@ export default function SheltersPage() {
 
   return (
     <div className="project-case-study">
-      <div className="py-4 px-6 max-w-[1400px] mx-auto">
-        <ProjectNavigation currentSlug="shelters-migrating-species" />
-      </div>
+      <ProjectNavigation currentSlug="shelters-migrating-species" />
 
       <div className="project-header max-w-[1200px] mx-auto px-6 mb-4">
         <h1 className="project-main-title hero-title opacity-0 font-bold">
@@ -300,7 +298,7 @@ export default function SheltersPage() {
               </div>
               <div className="section-visual">
                 <img
-                  src="https://raw.githubusercontent.com/kleindesign/portfo/main/kit-of-parts.png"
+                  src="/images/kit-of-parts.png"
                   alt="Kit of parts diagram showing shelter components"
                   className="w-full h-auto"
                 />
@@ -409,7 +407,7 @@ export default function SheltersPage() {
         <section className="content-section scroll-animate py-4">
           <div className="flex justify-center">
             <img
-              src="https://raw.githubusercontent.com/kleindesign/portfo/main/elevation.jpg"
+              src="/images/elevation.jpg"
               alt="Shelter elevation drawing"
               className="w-full h-auto"
               style={{ maxWidth: "800px" }}

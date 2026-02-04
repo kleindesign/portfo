@@ -66,7 +66,7 @@ export const KoetMeerIcon = ({ className = "" }: { className?: string }) => (
   {
     id: 5,
     title: "KoetMeer",
-    tagline: "growing and celebrating biodiversity in Amsterdam’s canals",
+    tagline: "growing and celebrating biodiversity in amsterdam's canals",
     slug: "koetmeer",
     icon: KoetMeerIcon,
   },
