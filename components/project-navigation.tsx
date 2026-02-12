@@ -51,7 +51,7 @@ export default function ProjectNavigation({ currentSlug }: ProjectNavigationProp
 
   return (
     <div
-      className="fixed top-6 left-6 z-50"
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-6 md:translate-x-0 md:top-6 md:bottom-auto z-50"
       style={{
         transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
       }}

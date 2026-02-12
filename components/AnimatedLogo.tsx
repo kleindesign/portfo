@@ -1,45 +1,153 @@
 "use client"
 
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
-export default function AnimatedLogo() {
+interface AnimatedLogoProps {
+  isHovered?: boolean
+  tapTrigger?: number
+}
+
+export default function AnimatedLogo({ isHovered = false, tapTrigger = 0 }: AnimatedLogoProps) {
+  const [isRolled, setIsRolled] = useState(true) // Start in swapped position
+  const [disableTransition, setDisableTransition] = useState(false)
+  const logoRef = useRef<HTMLDivElement>(null)
+  const wasOutOfView = useRef(false)
+
+  // Trigger animation on mount - roll into base state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsRolled(false) // Roll to base state
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Handle tap trigger for mobile - snap to swapped, then roll to base
+  useEffect(() => {
+    if (tapTrigger > 0) {
+      // Disable transition, snap to swapped instantly
+      setDisableTransition(true)
+      setIsRolled(true)
+
+      // Re-enable transition and roll to base
+      setTimeout(() => {
+        setDisableTransition(false)
+        setTimeout(() => {
+          setIsRolled(false)
+        }, 50)
+      }, 50)
+    }
+  }, [tapTrigger])
+
+  // Desktop hover - swap on hover, return on unhover
+  useEffect(() => {
+    if (isHovered) {
+      setIsRolled(true)
+    } else {
+      setIsRolled(false)
+    }
+  }, [isHovered])
+
+  // Swap when scrolling out of view, animate when scrolling back into view
+  useEffect(() => {
+    if (!logoRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const isVisible = entries[0].isIntersecting
+
+        if (!isVisible) {
+          // Logo scrolled out of viewport - swap it
+          setIsRolled(true)
+          wasOutOfView.current = true
+        } else if (isVisible && wasOutOfView.current) {
+          // Logo scrolled back into viewport - CLONE page load animation
+          setIsRolled(true)
+          setTimeout(() => {
+            setIsRolled(false)
+            wasOutOfView.current = false
+          }, 500)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(logoRef.current)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className="relative" style={{
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale'
-    }}>
+    <div
+      ref={logoRef}
+      className="relative cursor-pointer flex-shrink-0"
+      style={{
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        minWidth: '200px',
+        width: '200px'
+      }}
+    >
       <svg
         width="200"
         height="110"
-        viewBox="0 0 200 110"
+        viewBox="0 0 400 220"
+        preserveAspectRatio="xMidYMid meet"
         style={{
-          shapeRendering: 'geometricPrecision'
+          shapeRendering: 'geometricPrecision',
+          WebkitBackfaceVisibility: 'hidden',
+          WebkitPerspective: 1000,
+          WebkitTransform: 'translate3d(0,0,0)',
+          transform: 'translate3d(0,0,0)'
         }}
         xmlns="http://www.w3.org/2000/svg"
       >
-        <g>
-          <path d="M55.5,1.5h89c29.82,0,54,23.95,54,53.5h0c0,29.55-24.18,53.5-54,53.5H55.5C25.68,108.5,1.5,84.55,1.5,55h0C1.5,25.45,25.68,1.5,55.5,1.5Z" fill="none" stroke="#fff" strokeWidth="3"/>
-          <circle cx="145" cy="55" r="52" fill="#ff00a0"/>
+        {/* Frame (back layer) */}
+        <path d="M111,3h178c59.65,0,108,47.91,108,107h0c0,59.09-48.35,107-108,107H111c-59.65,0-108-47.91-108-107h0C3,50.91,51.35,3,111,3Z" fill="none" stroke="#fff" strokeWidth="6"/>
+
+        {/* Daniel Klein text (middle layer) */}
+        <g
+          style={{
+            transform: `translateX(${isRolled ? 208 : 0}px)`,
+            transition: disableTransition ? 'none' : 'transform 0.8s ease-in-out'
+          }}
+        >
+          <path d="M38.6,65.41h8.31c12,0,16.75,6.91,16.75,16.71,0,12.15-8.11,16.8-19.2,16.8h-5.86v-33.51ZM41.92,96.03h2.74c9.5,0,15.7-3.84,15.7-14.11s-6.1-13.63-13.58-13.63h-4.85v27.75Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M84.64,94.98h-.1c-1.34,2.93-4.75,4.51-7.78,4.51-6.96,0-8.06-4.7-8.06-6.91,0-8.21,8.74-8.59,15.07-8.59h.58v-1.25c0-4.18-1.49-6.29-5.57-6.29-2.54,0-4.94.58-7.2,2.02v-2.93c1.87-.91,5.04-1.68,7.2-1.68,6.05,0,8.59,2.74,8.59,9.12v10.8c0,1.97,0,3.46.24,5.14h-2.98v-3.94ZM84.35,86.58h-.86c-5.23,0-11.47.53-11.47,5.9,0,3.22,2.3,4.42,5.09,4.42,7.1,0,7.25-6.19,7.25-8.83v-1.49Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M94.57,80.19c0-1.87,0-3.79-.19-5.76h2.93v4.37h.1c1.01-2.21,2.83-4.95,7.92-4.95,6.05,0,8.35,4.03,8.35,9.41v15.65h-3.02v-14.88c0-4.61-1.63-7.58-5.81-7.58-5.52,0-7.25,4.85-7.25,8.93v13.54h-3.02v-18.72Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M124.29,67.9h-3.02v-4.03h3.02v4.03ZM121.26,74.43h3.02v24.48h-3.02v-24.48Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M148.33,98.15c-2.11.86-4.85,1.34-7.1,1.34-8.11,0-11.14-5.47-11.14-12.82s4.13-12.82,10.32-12.82c6.91,0,9.75,5.57,9.75,12.15v1.54h-16.75c0,5.18,2.78,9.36,8.06,9.36,2.21,0,5.42-.91,6.87-1.82v3.07ZM146.85,84.94c0-4.27-1.73-8.5-6.24-8.5s-7.2,4.46-7.2,8.5h13.44Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M155.92,62.91h3.02v36h-3.02v-36Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M39.33,123.01h3.31v15.03l15.07-15.03h4.32l-16.23,15.79,17.62,17.71h-4.56l-16.22-16.75v16.75h-3.31v-33.51Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M67.88,120.51h3.02v36h-3.02v-36Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M94.96,155.75c-2.11.86-4.85,1.34-7.1,1.34-8.11,0-11.14-5.47-11.14-12.82s4.13-12.82,10.32-12.82c6.91,0,9.75,5.57,9.75,12.14v1.54h-16.75c0,5.18,2.78,9.36,8.06,9.36,2.21,0,5.42-.91,6.87-1.82v3.07ZM93.47,142.54c0-4.27-1.73-8.5-6.24-8.5s-7.2,4.46-7.2,8.5h13.44Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M105.57,125.5h-3.02v-4.03h3.02v4.03ZM102.54,132.03h3.02v24.48h-3.02v-24.48Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M113.2,137.79c0-1.87,0-3.79-.19-5.76h2.93v4.37h.1c1.01-2.21,2.83-4.95,7.92-4.95,6.05,0,8.35,4.03,8.35,9.41v15.65h-3.02v-14.88c0-4.61-1.63-7.59-5.81-7.59-5.52,0-7.25,4.85-7.25,8.93v13.54h-3.02v-18.72Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
         </g>
-        <g>
-          <path d="M19.3,32.7h4.15c6,0,8.38,3.46,8.38,8.35,0,6.07-4.06,8.4-9.6,8.4h-2.93v-16.75ZM20.96,48.02h1.37c4.75,0,7.85-1.92,7.85-7.06s-3.05-6.82-6.79-6.82h-2.42v13.87Z" fill="#fff"/>
-          <path d="M42.32,47.49h-.05c-.67,1.46-2.38,2.26-3.89,2.26-3.48,0-4.03-2.35-4.03-3.46,0-4.1,4.37-4.3,7.54-4.3h.29v-.62c0-2.09-.74-3.14-2.78-3.14-1.27,0-2.47.29-3.6,1.01v-1.46c.94-.46,2.52-.84,3.6-.84,3.02,0,4.3,1.37,4.3,4.56v5.4c0,.98,0,1.73.12,2.57h-1.49v-1.97ZM42.17,43.29h-.43c-2.62,0-5.74.26-5.74,2.95,0,1.61,1.15,2.21,2.54,2.21,3.55,0,3.62-3.1,3.62-4.42v-.74Z" fill="#fff"/>
-          <path d="M47.29,40.1c0-.94,0-1.9-.1-2.88h1.46v2.18h.05c.5-1.1,1.42-2.47,3.96-2.47,3.02,0,4.18,2.02,4.18,4.7v7.82h-1.51v-7.44c0-2.3-.82-3.79-2.9-3.79-2.76,0-3.62,2.42-3.62,4.46v6.77h-1.51v-9.36Z" fill="#fff"/>
-          <path d="M62.14,33.95h-1.51v-2.02h1.51v2.02ZM60.63,37.22h1.51v12.24h-1.51v-12.24Z" fill="#fff"/>
-          <path d="M74.17,49.07c-1.06.43-2.42.67-3.55.67-4.06,0-5.57-2.74-5.57-6.41s2.06-6.41,5.16-6.41c3.46,0,4.87,2.78,4.87,6.07v.77h-8.38c0,2.59,1.39,4.68,4.03,4.68,1.1,0,2.71-.46,3.43-.91v1.54ZM73.42,42.47c0-2.14-.86-4.25-3.12-4.25s-3.6,2.23-3.6,4.25h6.72Z" fill="#fff"/>
-          <path d="M77.96,31.46h1.51v18h-1.51v-18Z" fill="#fff"/>
-          <path d="M19.66,61.5h1.66v7.51l7.54-7.51h2.16l-8.11,7.9,8.81,8.86h-2.28l-8.11-8.38v8.38h-1.66v-16.75Z" fill="#fff"/>
-          <path d="M33.94,60.25h1.51v18h-1.51v-18Z" fill="#fff"/>
-          <path d="M47.48,77.87c-1.06.43-2.42.67-3.55.67-4.06,0-5.57-2.74-5.57-6.41s2.06-6.41,5.16-6.41c3.46,0,4.87,2.78,4.87,6.07v.77h-8.38c0,2.59,1.39,4.68,4.03,4.68,1.1,0,2.71-.46,3.43-.91v1.54ZM46.74,71.27c0-2.14-.86-4.25-3.12-4.25s-3.6,2.23-3.6,4.25h6.72Z" fill="#fff"/>
-          <path d="M52.78,62.75h-1.51v-2.02h1.51v2.02ZM51.27,66.02h1.51v12.24h-1.51v-12.24Z" fill="#fff"/>
-          <path d="M56.6,68.9c0-.94,0-1.9-.1-2.88h1.46v2.18h.05c.5-1.1,1.42-2.47,3.96-2.47,3.02,0,4.18,2.02,4.18,4.71v7.82h-1.51v-7.44c0-2.3-.82-3.79-2.9-3.79-2.76,0-3.62,2.42-3.62,4.46v6.77h-1.51v-9.36Z" fill="#fff"/>
-          <path d="M115.02,34.22l1.37,1.37-1.43,1.43-1.37-1.37,1.43-1.43Z" fill="#fff"/>
-          <path d="M124.85,46.9l-1.07-1.07,1.38-1.38-.04-.03c-1.68.53-3.04.12-4.28-1.12-2.38-2.38-1.6-5.53.97-8.1,2.63-2.63,5.55-3.51,8.1-.97,1.7,1.7,1.31,3.79,1.04,4.36l.03.04,5.53-5.53,1.07,1.07-12.73,12.73ZM121.93,42.56c1.9,1.9,4.6.53,6.18-1.05s2.95-4.28,1.05-6.18c-2.04-2.04-4.5-.63-6.18,1.05-1.68,1.68-3.09,4.14-1.05,6.18Z" fill="#fff"/>
-          <path d="M133.5,55.01c-1.05-.44-2.19-1.24-2.99-2.04-2.87-2.87-2-5.87.59-8.47,2.65-2.65,5.99-3.07,8.18-.88,2.44,2.44,1.48,5.41-.85,7.74l-.54.54-5.92-5.92c-1.83,1.83-2.33,4.29-.46,6.16.78.78,2.24,1.59,3.07,1.78l-1.09,1.09ZM137.64,49.82c1.51-1.51,2.39-3.62.8-5.21-1.58-1.58-4.12-.97-5.55.46l4.75,4.75Z" fill="#fff"/>
-          <path d="M136.5,56.05c.32.97.88,1.97,1.71,2.8,1.02,1.02,2.48,1.36,3.46.37,2.05-2.05-2.43-5.89.08-8.4,1.71-1.71,3.75-.97,5.18.46.46.46,1.27,1.48,1.75,2.53l-1.03.83c-.31-.81-.92-1.73-1.51-2.32-1.1-1.1-2.21-1.53-3.31-.42-1.61,1.61,2.85,5.67.02,8.5-1.83,1.83-4.17.75-5.48-.56-.83-.83-1.56-1.77-2.02-2.83l1.15-.95Z" fill="#fff"/>
-          <path d="M151.17,55.91l1.07,1.07-8.66,8.66-1.07-1.07,8.66-8.66ZM154.54,54.67l-1.07-1.07,1.43-1.43,1.07,1.07-1.43,1.43Z" fill="#fff"/>
-          <path d="M153.85,74.48c-2.41,2.41-5.46,3.29-8.44.32-1.14-1.14-1.85-2.49-2.15-3.07l1.15-.98c.32,1,1,2.22,1.93,3.16,2.75,2.75,4.99.98,7.43-1.46l-.03-.03c-1.83.68-3.22.17-4.33-.93-2.77-2.77-1.24-6.06.68-7.98,2.63-2.63,5.55-3.51,8.1-.97,1.15,1.15,1.75,2.05,1.51,3.89l.03.03.98-.98,1.07,1.07-7.94,7.94ZM150.35,70.58c1.93,1.93,4.46.8,6.04-.78,2.09-2.09,3-4.23,1.05-6.18-2.04-2.04-4.5-.63-6.18,1.05-1.7,1.7-2.73,4.09-.92,5.91Z" fill="#fff"/>
-          <path d="M162.33,71.15c.66-.66,1.34-1.34,1.97-2.1l1.04,1.04-1.54,1.54.04.03c1.14-.42,2.75-.75,4.55,1.05,2.14,2.14,1.53,4.38-.37,6.28l-5.53,5.53-1.07-1.07,5.26-5.26c1.63-1.63,2.1-3.26.63-4.74-1.95-1.95-4.28-.85-5.72.59l-4.79,4.79-1.07-1.07,6.62-6.62Z" fill="#fff"/>
+
+        {/* Ball (top layer) */}
+        <g
+          style={{
+            transform: `translateX(${isRolled ? -180 : 0}px)`,
+            transition: disableTransition ? 'none' : 'transform 0.8s ease-in-out'
+          }}
+        >
+          <circle cx="290" cy="110" r="104" fill="#ff00a0"/>
+        </g>
+
+        {/* .design text (front layer) */}
+        <g
+          style={{
+            transform: `translateX(${isRolled ? -180 : 0}px) rotate(${isRolled ? -90 : 0}deg)`,
+            transformOrigin: '290px 110px',
+            transition: disableTransition ? 'none' : 'transform 0.8s ease-in-out'
+          }}
+        >
+          <path d="M230.04,68.45l2.75,2.75-2.85,2.85-2.75-2.75,2.85-2.85Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M249.69,93.8l-2.14-2.14,2.75-2.75-.07-.07c-3.36,1.05-6.07.24-8.55-2.24-4.75-4.75-3.19-11.06,1.93-16.19,5.26-5.26,11.1-7.03,16.19-1.94,3.39,3.39,2.61,7.57,2.07,8.72l.07.07,11.07-11.07,2.14,2.14-25.46,25.46ZM243.85,85.11c3.8,3.8,9.2,1.05,12.36-2.11s5.91-8.55,2.1-12.36c-4.07-4.07-8.99-1.26-12.36,2.11-3.36,3.36-6.18,8.28-2.11,12.36Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M267,110.03c-2.11-.88-4.38-2.48-5.97-4.07-5.74-5.73-4.01-11.74,1.19-16.94,5.29-5.3,11.98-6.14,16.36-1.77,4.89,4.89,2.95,10.83-1.7,15.48l-1.09,1.09-11.85-11.85c-3.67,3.66-4.65,8.59-.92,12.32,1.56,1.56,4.48,3.19,6.14,3.56l-2.17,2.17ZM275.28,99.64c3.02-3.02,4.79-7.23,1.6-10.42-3.16-3.16-8.25-1.93-11.1.92l9.5,9.5Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M273.01,112.1c.65,1.94,1.76,3.94,3.43,5.6,2.04,2.04,4.96,2.72,6.93.75,4.11-4.11-4.86-11.78.17-16.8,3.43-3.43,7.5-1.93,10.36.92.92.92,2.54,2.95,3.49,5.06l-2.07,1.66c-.61-1.63-1.83-3.46-3.02-4.65-2.21-2.21-4.41-3.06-6.62-.85-3.22,3.22,5.7,11.34.04,17.01-3.67,3.67-8.35,1.5-10.96-1.12-1.66-1.66-3.12-3.53-4.04-5.67l2.31-1.9Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M302.33,111.82l2.14,2.14-17.31,17.31-2.14-2.14,17.31-17.31ZM309.09,109.35l-2.14-2.14,2.85-2.85,2.14,2.14-2.85,2.85Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M307.7,148.96c-4.82,4.82-10.93,6.59-16.87.64-2.27-2.27-3.7-4.99-4.31-6.14l2.31-1.97c.65,2,2,4.45,3.87,6.31,5.5,5.5,9.98,1.97,14.87-2.92l-.07-.07c-3.67,1.36-6.45.34-8.66-1.87-5.53-5.53-2.48-12.12,1.36-15.95,5.26-5.26,11.1-7.03,16.19-1.94,2.31,2.31,3.5,4.11,3.02,7.77l.07.07,1.97-1.97,2.14,2.14-15.89,15.89ZM300.7,141.15c3.87,3.87,8.93,1.6,12.08-1.56,4.18-4.18,6.01-8.45,2.11-12.36-4.07-4.07-8.99-1.26-12.36,2.1-3.39,3.39-5.46,8.18-1.83,11.81Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
+          <path d="M324.67,142.3c1.32-1.32,2.68-2.68,3.94-4.21l2.07,2.07-3.09,3.09.07.07c2.27-.85,5.5-1.49,9.1,2.11,4.28,4.28,3.05,8.76-.75,12.56l-11.06,11.06-2.14-2.14,10.52-10.52c3.26-3.26,4.21-6.52,1.26-9.47-3.9-3.9-8.55-1.7-11.44,1.19l-9.57,9.57-2.14-2.14,13.24-13.24Z" fill="#fff" stroke="white" strokeWidth="1.2"/>
         </g>
       </svg>
     </div>

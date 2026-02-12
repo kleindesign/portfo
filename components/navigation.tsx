@@ -8,26 +8,47 @@ import AnimatedLogo from "./AnimatedLogo"
 
 export default function Navigation() {
   const pathname = usePathname()
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHeaderHovered, setIsHeaderHovered] = useState(false)
+  const [tapTrigger, setTapTrigger] = useState(0)
 
   // Don't show navigation on home page (splash page)
   if (pathname === "/") {
     return null
   }
 
+  const handleTouchOrClick = (e: React.TouchEvent | React.MouseEvent) => {
+    // For touch events, trigger immediately
+    // For mouse events on desktop, let hover handle it
+    if (e.type === 'touchstart' || (e.type === 'click' && window.innerWidth < 768)) {
+      // Increment counter to trigger animation
+      setTapTrigger(prev => prev + 1)
+    }
+  }
+
   return (
-    <header className="w-full bg-black site-header animate-slide-in-left">
+    <header
+      className="w-full bg-black site-header animate-slide-in-left"
+      onMouseEnter={() => setIsHeaderHovered(true)}
+      onMouseLeave={() => setIsHeaderHovered(false)}
+      onTouchStart={handleTouchOrClick}
+      onClick={handleTouchOrClick}
+    >
       <div className="site-header-container">
         {/* Header with Navigation and Animated Logo */}
         <div className="max-w-[1400px] mx-auto px-6 py-8">
-          <div className="flex justify-between items-center">
-            {/* Navigation Links */}
-            <nav className="flex space-x-8">
+          <div className="flex flex-col md:flex-row justify-center md:justify-end items-center gap-4 md:gap-12">
+            {/* Animated Logo Toggle - appears first on mobile, last on desktop */}
+            <div className="order-1 md:order-2">
+              <AnimatedLogo key={pathname} isHovered={isHeaderHovered} tapTrigger={tapTrigger} />
+            </div>
+
+            {/* Navigation Links - appears second on mobile, first on desktop */}
+            <nav className="flex space-x-8 order-2 md:order-1">
               <Link
                 href="/"
                 className={cn(
-                  "nav-link text-2xl font-roboto transition-all duration-300 ease-in-out hover:font-bold",
-                  pathname === "/" ? "text-white active font-bold" : "text-white opacity-70 hover:opacity-100",
+                  "nav-link text-base font-roboto tracking-wide transition-all duration-300 ease-in-out hover:font-bold",
+                  pathname === "/" ? "text-white active font-bold tracking-wider" : "text-white hover:opacity-100",
                 )}
               >
                 home
@@ -35,10 +56,10 @@ export default function Navigation() {
               <Link
                 href="/projects"
                 className={cn(
-                  "nav-link text-2xl font-roboto transition-all duration-300 ease-in-out hover:font-bold",
+                  "nav-link text-base font-roboto tracking-wide transition-all duration-300 ease-in-out hover:font-bold",
                   pathname === "/projects" || pathname.startsWith("/projects/")
-                    ? "text-white active font-bold"
-                    : "text-white opacity-70 hover:opacity-100",
+                    ? "text-white active font-bold tracking-wider"
+                    : "text-white hover:opacity-100",
                 )}
               >
                 projects
@@ -46,16 +67,13 @@ export default function Navigation() {
               <Link
                 href="/about"
                 className={cn(
-                  "nav-link text-2xl font-roboto transition-all duration-300 ease-in-out hover:font-bold",
-                  pathname === "/about" ? "text-white active font-bold" : "text-white opacity-70 hover:opacity-100",
+                  "nav-link text-base font-roboto tracking-wide transition-all duration-300 ease-in-out hover:font-bold",
+                  pathname === "/about" ? "text-white active font-bold tracking-wider" : "text-white hover:opacity-100",
                 )}
               >
                 about
               </Link>
             </nav>
-
-            {/* Animated Logo Toggle */}
-            <AnimatedLogo />
           </div>
         </div>
       </div>
